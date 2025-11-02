@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Professional HTML Developer Portfolio - Showcasing advanced HTML skills and web development expertise">
+    <meta name="keywords" content="HTML, CSS, JavaScript, Web Developer, Portfolio, Frontend">
+    <meta name="author" content="Your Name">
+    <title>HTML Developer Portfolio | Your Name</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="#home" aria-label="Go to home section">
+                    <span class="logo">HTML</span>
+                    <span class="logo-accent">Dev</span>
+                </a>
+            </div>
+            <ul class="nav-menu" role="menubar">
+                <li role="none"><a href="#home" role="menuitem">Home</a></li>
+                <li role="none"><a href="#about" role="menuitem">About</a></li>
+                <li role="none"><a href="#skills" role="menuitem">Skills</a></li>
+                <li role="none"><a href="#projects" role="menuitem">Projects</a></li>
+                <li role="none"><a href="#contact" role="menuitem">Contact</a></li>
+            </ul>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span class="hamburger"></span>
+                <span class="hamburger"></span>
+                <span class="hamburger"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero" aria-labelledby="hero-title">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 id="hero-title" class="hero-title">
+                    <span class="hero-greeting">Hello, I'm</span>
+                    <span class="hero-name">Your Name</span>
+                    <span class="hero-role">HTML Developer</span>
+                </h1>
+                <p class="hero-description">
+                    Crafting semantic, accessible, and performant web experiences with modern HTML5, 
+                    CSS3, and JavaScript. Passionate about clean code and user-centered design.
+                </p>
+                <div class="hero-actions">
+                    <a href="#projects" class="btn btn-primary">View My Work</a>
+                    <a href="#contact" class="btn btn-secondary">Get In Touch</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="code-preview">
+                    <div class="code-header">
+                        <div class="code-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <span class="code-title">index.html</span>
+                    </div>
+                    <pre class="code-content"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;Portfolio&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Hello World!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about" aria-labelledby="about-title">
+        <div class="container">
+            <h2 id="about-title" class="section-title">About Me</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>
+                        I'm a passionate HTML developer with expertise in creating semantic, 
+                        accessible, and performance-optimized web applications. My focus is on 
+                        writing clean, maintainable code that follows web standards and best practices.
+                    </p>
+                    <p>
+                        With a deep understanding of HTML5 semantics, CSS3 features, and modern 
+                        JavaScript, I build responsive websites that work seamlessly across all 
+                        devices and browsers.
+                    </p>
+                    <div class="about-highlights">
+                        <div class="highlight">
+                            <h3>Semantic HTML</h3>
+                            <p>Expert in HTML5 semantic elements and document structure</p>
+                        </div>
+                        <div class="highlight">
+                            <h3>Accessibility</h3>
+                            <p>WCAG compliant websites with proper ARIA implementation</p>
+                        </div>
+                        <div class="highlight">
+                            <h3>Performance</h3>
+                            <p>Optimized markup for fast loading and excellent user experience</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="skills" aria-labelledby="skills-title">
+        <div class="container">
+            <h2 id="skills-title" class="section-title">Technical Skills</h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3>HTML & Markup</h3>
+                    <ul class="skill-list">
+                        <li>HTML5 Semantic Elements</li>
+                        <li>Document Structure & Outline</li>
+                        <li>Forms & Input Validation</li>
+                        <li>Microdata & Schema.org</li>
+                        <li>Web Components</li>
+                        <li>Progressive Enhancement</li>
+                    </ul>
+                </div>
+                <div class="skill-category">
+                    <h3>CSS & Styling</h3>
+                    <ul class="skill-list">
+                        <li>CSS3 & Modern Features</li>
+                        <li>Flexbox & CSS Grid</li>
+                        <li>Responsive Design</li>
+                        <li>CSS Animations</li>
+                        <li>Sass/SCSS</li>
+                        <li>CSS Architecture (BEM)</li>
+                    </ul>
+                </div>
+                <div class="skill-category">
+                    <h3>Accessibility & SEO</h3>
+                    <ul class="skill-list">
+                        <li>WCAG 2.1 Guidelines</li>
+                        <li>ARIA Attributes</li>
+                        <li>Screen Reader Testing</li>
+                        <li>Semantic SEO</li>
+                        <li>Meta Tags & Open Graph</li>
+                        <li>Core Web Vitals</li>
+                    </ul>
+                </div>
+                <div class="skill-category">
+                    <h3>Tools & Technologies</h3>
+                    <ul class="skill-list">
+                        <li>Git & Version Control</li>
+                        <li>Build Tools (Webpack, Vite)</li>
+                        <li>Browser DevTools</li>
+                        <li>Performance Testing</li>
+                        <li>Cross-browser Testing</li>
+                        <li>Figma to HTML</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects" aria-labelledby="projects-title">
+        <div class="container">
+            <h2 id="projects-title" class="section-title">Featured Projects</h2>
+            <div class="projects-grid">
+                <article class="project-card">
+                    <div class="project-image">
+                        <div class="project-placeholder">
+                            <span>Semantic Blog</span>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Semantic Blog Platform</h3>
+                        <p>A fully semantic HTML5 blog with proper document structure, microdata, and accessibility features.</p>
+                        <div class="project-tech">
+                            <span class="tech-tag">HTML5</span>
+                            <span class="tech-tag">CSS3</span>
+                            <span class="tech-tag">Microdata</span>
+                            <span class="tech-tag">ARIA</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="#" class="project-link">Live Demo</a>
+                            <a href="#" class="project-link">Source Code</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="project-card">
+                    <div class="project-image">
+                        <div class="project-placeholder">
+                            <span>E-commerce</span>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Accessible E-commerce</h3>
+                        <p>WCAG 2.1 AA compliant e-commerce site with advanced form validation and screen reader support.</p>
+                        <div class="project-tech">
+                            <span class="tech-tag">HTML5</span>
+                            <span class="tech-tag">CSS Grid</span>
+                            <span class="tech-tag">JavaScript</span>
+                            <span class="tech-tag">WCAG 2.1</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="#" class="project-link">Live Demo</a>
+                            <a href="#" class="project-link">Source Code</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="project-card">
+                    <div class="project-image">
+                        <div class="project-placeholder">
+                            <span>Dashboard</span>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Admin Dashboard</h3>
+                        <p>Responsive admin dashboard with complex data tables, charts, and interactive components.</p>
+                        <div class="project-tech">
+                            <span class="tech-tag">HTML5</span>
+                            <span class="tech-tag">Flexbox</span>
+                            <span class="tech-tag">CSS Variables</span>
+                            <span class="tech-tag">Web Components</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="#" class="project-link">Live Demo</a>
+                            <a href="#" class="project-link">Source Code</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact" aria-labelledby="contact-title">
+        <div class="container">
+            <h2 id="contact-title" class="section-title">Get In Touch</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Let's Work Together</h3>
+                    <p>
+                        I'm always interested in new opportunities and exciting projects. 
+                        Whether you need help with HTML development, accessibility improvements, 
+                        or performance optimization, I'd love to hear from you.
+                    </p>
+                    <div class="contact-methods">
+                        <div class="contact-method">
+                            <strong>Email:</strong>
+                            <a href="mailto:your.email@example.com">your.email@example.com</a>
+                        </div>
+                        <div class="contact-method">
+                            <strong>LinkedIn:</strong>
+                            <a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener noreferrer">
+                                linkedin.com/in/yourprofile
+                            </a>
+                        </div>
+                        <div class="contact-method">
+                            <strong>GitHub:</strong>
+                            <a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer">
+                                github.com/yourusername
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form" action="#" method="POST" novalidate>
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input type="text" id="name" name="name" required aria-describedby="name-error">
+                        <span id="name-error" class="error-message" role="alert"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required aria-describedby="email-error">
+                        <span id="email-error" class="error-message" role="alert"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" name="subject">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" name="message" rows="5" required aria-describedby="message-error"></textarea>
+                        <span id="message-error" class="error-message" role="alert"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Your Name. All rights reserved.</p>
+                <p>Built with semantic HTML5, modern CSS3, and accessibility in mind.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
