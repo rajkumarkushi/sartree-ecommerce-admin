@@ -19,44 +19,75 @@ const Orders = () => {
   }, []);
 
   const fetchOrders = async () => {
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    try {
-      const token = localStorage.getItem("adminToken");
-      if (!token) {
-        setError("No token found. Please log in again.");
-        toast.error("No token found. Please log in again.");
-        setLoading(false);
-        return;
-      }
+  try {
+    const token = localStorage.getItem("adminToken");
+    if (!token) {
+      setError("No token found. Please log in again.");
+      toast.error("No token found. Please log in again.");
+      setLoading(false);
+      return;
+    }
 
-      const response = await fetch("https://api.sartree.com/api/v1/admin/orders", {
+    let allOrders: any[] = [];
+    let currentPage = 1;
+    let lastPage = 1;
+
+    // Fetch first page to get pagination info
+    const firstRes = await fetch(
+      `https://api.sartree.com/api/v1/admin/orders?page=1`,
+      {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-      });
-
-      const result = await response.json();
-      console.log("✅ Orders API Response:", result);
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to fetch orders");
       }
+    );
 
-      const ordersData = Array.isArray(result?.data) ? result.data : [];
-      setOrders(ordersData);
-    } catch (err: any) {
-      console.error("❌ Orders Fetch Error:", err);
-      setError(err.message || "Error fetching orders");
-      toast.error(`❌ ${err.message}`);
-    } finally {
-      setLoading(false);
+    const firstData = await firstRes.json();
+    console.log("✅ Page 1:", firstData);
+
+    if (!firstRes.ok) throw new Error(firstData.message || "Failed to fetch orders");
+
+    allOrders = [...firstData.data];
+    lastPage = firstData?.pagination?.last_page || 1;
+
+    // Fetch remaining pages if exist
+    for (let page = 2; page <= lastPage; page++) {
+      const res = await fetch(
+        `https://api.sartree.com/api/v1/admin/orders?page=${page}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await res.json();
+      console.log(`✅ Page ${page}:`, result);
+
+      if (res.ok && Array.isArray(result.data)) {
+        allOrders = [...allOrders, ...result.data];
+      }
     }
-  };
+
+    console.log("✅ All Orders Combined:", allOrders);
+    setOrders(allOrders);
+  } catch (err: any) {
+    console.error("❌ Orders Fetch Error:", err);
+    setError(err.message || "Error fetching orders");
+    toast.error(`❌ ${err.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Format INR ₹ currency
   const formatCurrency = (amount: string | number) =>

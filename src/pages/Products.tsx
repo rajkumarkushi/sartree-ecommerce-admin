@@ -72,7 +72,7 @@ const Products = () => {
       return;
     }
 
-    const response = await fetch("https://api.sartree.com/api/v1/product", {
+    const response = await fetch("https://api.sartree.com/api/v1/admin/product/new-product", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -80,25 +80,33 @@ const Products = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        title: newProduct.name,
-        category_id: newProduct.category_id || 1, // default or selected category
-        price: newProduct.price.replace("₹", ""),
-        stock: newProduct.stock,
+        main_category_id: newProduct.main_category_id || 6, // example default
+        child_category_id: newProduct.child_category_id || 7,
+        title: newProduct.name || newProduct.title, // ✅ backend expects 'title'
+        price: parseFloat(newProduct.price),
+        tax_amount: parseFloat(newProduct.tax_amount || 0),
+        tax_percentage: parseFloat(newProduct.tax_percentage || 0),
+        discount: newProduct.discount || null,
+        discount_amount: newProduct.discount_amount || null,
         description: newProduct.description || "",
-        status: "active",
+        status: 1,
+        availability: parseInt(newProduct.availability || 0),
+        quantity: parseInt(newProduct.quantity || 0),
+        image: newProduct.image || "",
+        weight: newProduct.weight || "kg",
       }),
     });
 
     const result = await response.json();
+    console.log("✅ Add Product Response:", result);
 
     if (!response.ok) {
       throw new Error(result.message || "Failed to add product.");
     }
 
-    // ✅ Append new product to UI
+    // ✅ Update the frontend instantly with the newly added product
     setProducts((prev) => [result.data || newProduct, ...prev]);
-    toast.success(`✅ ${newProduct.name} added successfully!`);
-
+    toast.success(`✅ ${newProduct.name || newProduct.title} added successfully!`);
   } catch (err: any) {
     console.error("❌ Add Product Error:", err);
     toast.error(err.message || "Failed to add product.");

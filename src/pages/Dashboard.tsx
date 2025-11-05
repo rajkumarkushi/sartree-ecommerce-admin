@@ -54,8 +54,9 @@ const Dashboard = () => {
         : customersData?.data?.length || 0;
 
       const ordersArray = Array.isArray(ordersData)
-        ? ordersData
-        : ordersData?.data || [];
+  ? ordersData
+  : ordersData?.data || [];
+const totalOrders = ordersData?.pagination?.total || ordersArray.length;
 
       const products = Array.isArray(productsData)
         ? productsData.length
@@ -75,12 +76,12 @@ const Dashboard = () => {
         )
         .slice(0, 5);
 
-      setStats({
-        customers,
-        orders: ordersArray.length,
-        products,
-        revenue: totalRevenue,
-      });
+    setStats({
+  customers,
+  orders: totalOrders, // ✅ show total orders from backend pagination
+  products,
+  revenue: totalRevenue,
+});
       setRecentOrders(recent);
     } catch (err: any) {
       console.error("Dashboard fetch error:", err);
