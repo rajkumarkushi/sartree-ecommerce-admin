@@ -1,4 +1,4 @@
-// src/components/AppSidebar.tsx
+import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -9,19 +9,11 @@ import {
   Settings as SettingsIcon,
   User,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import "../styles/sidebar.css";
 
 const navigationItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -38,59 +30,67 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ onSignOut }: AppSidebarProps) {
-  const { state } = useSidebar();
   const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
   const currentPath = location.pathname;
-  const collapsed = state === "collapsed";
 
-  const isActive = (path: string) => currentPath === path;
-  const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center w-full ${
-      isActive 
-        ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700" 
-        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-    } transition-colors duration-200`;
+  // ✅ Close sidebar automatically when screen is resized back to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 1024) setIsOpen(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // ✅ Close sidebar after navigation on small screens
+  const handleNavClick = () => {
+    if (window.innerWidth <= 1024) setIsOpen(false);
+  };
 
   return (
-    <Sidebar className={collapsed ? "w-16" : "w-64"} collapsible="icon">
-      <SidebarContent className="bg-white border-r border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          {!collapsed && (
-            <h2 className="text-xl font-bold text-gray-800">ECommerce</h2>
-          )}
-        </div>
-        
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">
-            Navigation
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className={`h-5 w-5 ${collapsed ? "mx-auto" : "mr-3"}`} />
-                      {!collapsed && <span className="font-medium">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+    <>
+      {/* ☰ Toggle button for mobile */}
+      <button
+        className="sidebar-toggle-btn"
+        onClick={() => setIsOpen(true)}
+      >
+        <Menu size={22} />
+      </button>
 
-        <div className="mt-auto p-4 border-t border-gray-200">
-          <Button
-            variant="ghost"
-            onClick={onSignOut}
-            className={`w-full ${getNavCls({ isActive: false })}`}
-          >
-            <LogOut className={`h-5 w-5 ${collapsed ? "mx-auto" : "mr-3"}`} />
-            {!collapsed && <span>Sign Out</span>}
+      {/* Sidebar */}
+      <aside className={`sidebar-container ${isOpen ? "open" : ""}`}>
+        <div className="sidebar-header">
+          <h2 className="sidebar-logo">ECommerce</h2>
+          <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>
+            <X size={22} />
+          </button>
+        </div>
+
+        <nav className="sidebar-menu">
+          {navigationItems.map((item) => (
+            <NavLink
+              key={item.url}
+              to={item.url}
+              className={`sidebar-link ${currentPath === item.url ? "active" : ""}`}
+              onClick={handleNavClick}
+            >
+              <item.icon size={18} />
+              <span>{item.title}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="sidebar-footer">
+          <Button className="logout-btn" onClick={onSignOut}>
+            <LogOut size={18} />
+            <span>Sign Out</span>
           </Button>
         </div>
-      </SidebarContent>
-    </Sidebar>
+      </aside>
+
+      {/* Overlay for mobile */}
+      {isOpen && <div className="sidebar-overlay" onClick={() => setIsOpen(false)}></div>}
+    </>
   );
 }

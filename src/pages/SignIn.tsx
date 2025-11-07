@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, ShoppingBag } from "lucide-react";
+import "../styles/signin.css";
+
 
 interface SignInProps {
   onSignIn: (token: string) => void;
@@ -77,8 +79,8 @@ const SignIn: React.FC<SignInProps> = ({ onSignIn }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <Card className="w-full max-w-md shadow-xl">
+    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 transition-opacity duration-500 opacity-100">
+      <Card className="w-full max-w-md shadow-2xl rounded-2xl animate-fade-in">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="p-3 bg-blue-600 rounded-full">
@@ -88,7 +90,9 @@ const SignIn: React.FC<SignInProps> = ({ onSignIn }) => {
           <CardTitle className="text-2xl font-bold text-gray-900">
             Super Admin Sign In
           </CardTitle>
-          <p className="text-gray-600">Access your ecommerce admin dashboard</p>
+          <p className="text-gray-600 text-sm">
+            Access your ecommerce admin dashboard
+          </p>
         </CardHeader>
 
         <CardContent>
@@ -146,6 +150,17 @@ const SignIn: React.FC<SignInProps> = ({ onSignIn }) => {
           </form>
         </CardContent>
       </Card>
+
+      {/* Small fade animation */}
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.4s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 };

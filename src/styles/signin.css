@@ -1,0 +1,35 @@
+/* ===== SignIn Page Responsive Styles ===== */
+
+/* Base (Mobile-first) */
+.signin-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom right, #eef2ff, #e0e7ff);
+}
+
+.signin-card {
+  width: 90%;
+  max-width: 340px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Tablet View (≥768px) */
+@media (min-width: 768px) {
+  .signin-card {
+    max-width: 480px;
+    padding: 36px;
+  }
+}
+
+/* Laptop/Desktop View (≥1024px) */
+@media (min-width: 1024px) {
+  .signin-card {
+    max-width: 580px;
+    padding: 48px;
+  }
+}

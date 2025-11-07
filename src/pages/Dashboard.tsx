@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, ShoppingCart, Package, DollarSign } from "lucide-react";
 import { toast } from "sonner";
+import "../styles/dashboard.css";
 
 const Dashboard = () => {
   const [stats, setStats] = useState({

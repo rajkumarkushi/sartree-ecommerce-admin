@@ -13,53 +13,82 @@ const Orders = () => {
   const [error, setError] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [newStatus, setNewStatus] = useState("");
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
+  // 🔹 Fetch All Orders
   const fetchOrders = async () => {
-  setLoading(true);
-  setError("");
+    setLoading(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("adminToken");
+      if (!token) {
+        setError("No token found. Please log in again.");
+        toast.error("No token found. Please log in again.");
+        setLoading(false);
+        return;
+      }
 
-  try {
-    const token = localStorage.getItem("adminToken");
-    if (!token) {
-      setError("No token found. Please log in again.");
-      toast.error("No token found. Please log in again.");
-      setLoading(false);
-      return;
-    }
+      let allOrders: any[] = [];
+      let lastPage = 1;
 
-    let allOrders: any[] = [];
-    let currentPage = 1;
-    let lastPage = 1;
-
-    // Fetch first page to get pagination info
-    const firstRes = await fetch(
-      `https://api.sartree.com/api/v1/admin/orders?page=1`,
-      {
+      const firstRes = await fetch(`https://api.sartree.com/api/v1/admin/orders?page=1`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: "application/json",
           "Content-Type": "application/json",
         },
+      });
+
+      const firstData = await firstRes.json();
+      if (!firstRes.ok) throw new Error(firstData.message || "Failed to fetch orders");
+
+      allOrders = [...firstData.data];
+      lastPage = firstData?.pagination?.last_page || 1;
+
+      for (let page = 2; page <= lastPage; page++) {
+        const res = await fetch(`https://api.sartree.com/api/v1/admin/orders?page=${page}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        });
+        const result = await res.json();
+        if (res.ok && Array.isArray(result.data)) {
+          allOrders = [...allOrders, ...result.data];
+        }
       }
-    );
 
-    const firstData = await firstRes.json();
-    console.log("✅ Page 1:", firstData);
+      setOrders(allOrders);
+    } catch (err: any) {
+      console.error("❌ Orders Fetch Error:", err);
+      setError(err.message || "Error fetching orders");
+      toast.error(`❌ ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    if (!firstRes.ok) throw new Error(firstData.message || "Failed to fetch orders");
+  // 🔹 Fetch Single Order Details
+  const fetchOrderDetails = async (orderId: number) => {
+    try {
+      setLoadingDetails(true);
+      const token = localStorage.getItem("adminToken");
+      if (!token) {
+        toast.error("No token found. Please log in again.");
+        return;
+      }
 
-    allOrders = [...firstData.data];
-    lastPage = firstData?.pagination?.last_page || 1;
-
-    // Fetch remaining pages if exist
-    for (let page = 2; page <= lastPage; page++) {
-      const res = await fetch(
-        `https://api.sartree.com/api/v1/admin/orders?page=${page}`,
+      const response = await fetch(
+        `https://api.sartree.com/api/v1/admin/orders/${orderId}`,
         {
           method: "GET",
           headers: {
@@ -70,49 +99,82 @@ const Orders = () => {
         }
       );
 
-      const result = await res.json();
-      console.log(`✅ Page ${page}:`, result);
+      const data = await response.json();
+      console.log("🟢 Single Order Details:", data);
 
-      if (res.ok && Array.isArray(result.data)) {
-        allOrders = [...allOrders, ...result.data];
-      }
+      if (!response.ok) throw new Error(data.message || "Failed to fetch order details");
+
+      setSelectedOrder(data.data || data);
+      setNewStatus(data.data?.status || data.status || "");
+      setIsModalOpen(true);
+    } catch (err: any) {
+      console.error("❌ Order Details Error:", err);
+      toast.error(err.message || "Error loading order details");
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  // 🔹 Update Order Status
+  const updateOrderStatus = async () => {
+    if (!selectedOrder || !newStatus) {
+      toast.error("Please select a status");
+      return;
     }
 
-    console.log("✅ All Orders Combined:", allOrders);
-    setOrders(allOrders);
-  } catch (err: any) {
-    console.error("❌ Orders Fetch Error:", err);
-    setError(err.message || "Error fetching orders");
-    toast.error(`❌ ${err.message}`);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setUpdating(true);
+      const token = localStorage.getItem("adminToken");
+      if (!token) {
+        toast.error("Token missing. Please log in again.");
+        return;
+      }
 
-  // Format INR ₹ currency
+      const response = await fetch(
+        `https://api.sartree.com/api/v1/admin/order/${selectedOrder.id}/status`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ order_status: newStatus }),
+        }
+      );
+
+      const data = await response.json();
+      console.log("🟢 Update Response:", data);
+
+      if (!response.ok) throw new Error(data.message || "Failed to update status");
+
+      // Update locally
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === selectedOrder.id ? { ...order, status: newStatus } : order
+        )
+      );
+
+      setSelectedOrder((prev) =>
+        prev ? { ...prev, status: newStatus } : prev
+      );
+
+      toast.success("✅ Order status updated successfully!");
+      setIsModalOpen(false);
+    } catch (err: any) {
+      console.error("❌ Update Error:", err);
+      toast.error(err.message || "Error updating status");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // 🔹 Helpers
   const formatCurrency = (amount: string | number) =>
-    new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 2,
-    }).format(Number(amount || 0));
+    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(Number(amount || 0));
 
-  // Format date/time for display
   const formatDate = (dateStr: string) =>
-    dateStr
-      ? new Date(dateStr).toLocaleString("en-IN", {
-          dateStyle: "medium",
-          timeStyle: "short",
-        })
-      : "-";
-
-  const filteredOrders = orders.filter((order) => {
-    const fullName = `${order.user?.first_name || ""} ${order.user?.last_name || ""}`.toLowerCase();
-    return (
-      fullName.includes(searchTerm.toLowerCase()) ||
-      order.id.toString().includes(searchTerm)
-    );
-  });
+    dateStr ? new Date(dateStr).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "-";
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -130,10 +192,13 @@ const Orders = () => {
     }
   };
 
-  const openOrderModal = (order: any) => {
-    setSelectedOrder(order);
-    setIsModalOpen(true);
-  };
+  const filteredOrders = orders.filter((order) => {
+    const fullName = `${order.user?.first_name || ""} ${order.user?.last_name || ""}`.toLowerCase();
+    return (
+      fullName.includes(searchTerm.toLowerCase()) ||
+      order.id.toString().includes(searchTerm)
+    );
+  });
 
   const closeModal = () => {
     setSelectedOrder(null);
@@ -150,12 +215,10 @@ const Orders = () => {
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
+            <Filter className="h-4 w-4 mr-2" /> Filter
           </Button>
           <Button variant="outline" onClick={() => toast.info("📦 Export feature coming soon!")}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
+            <Download className="h-4 w-4 mr-2" /> Export
           </Button>
         </div>
       </div>
@@ -176,7 +239,6 @@ const Orders = () => {
             </div>
           </div>
         </CardHeader>
-
         <CardContent>
           {loading ? (
             <p className="text-gray-500">Loading orders...</p>
@@ -189,44 +251,33 @@ const Orders = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Order ID</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Customer</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Date</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Items</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Total</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Actions</th>
+                    <th className="py-3 px-4 text-left">Order ID</th>
+                    <th className="py-3 px-4 text-left">Customer</th>
+                    <th className="py-3 px-4 text-left">Date</th>
+                    <th className="py-3 px-4 text-left">Items</th>
+                    <th className="py-3 px-4 text-left">Total</th>
+                    <th className="py-3 px-4 text-left">Status</th>
+                    <th className="py-3 px-4 text-left">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredOrders.map((order) => (
-                    <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-4 px-4 font-medium text-blue-600">#{order.id}</td>
-                      <td className="py-4 px-4 text-gray-900">
-                        {order.user
-                          ? `${order.user.first_name || ""} ${order.user.last_name || ""}`
-                          : "Unknown"}
-                        <br />
-                        <span className="text-sm text-gray-500">
-                          {order.user?.email || "-"}
+                    <tr key={order.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4 font-medium text-blue-600">#{order.id}</td>
+                      <td className="py-3 px-4 text-gray-900">
+                        {order.user ? `${order.user.first_name} ${order.user.last_name}` : "Unknown"} <br />
+                        <span className="text-sm text-gray-500">{order.user?.email}</span>
+                      </td>
+                      <td className="py-3 px-4 text-gray-600">{formatDate(order.created_at)}</td>
+                      <td className="py-3 px-4">{order.items?.length || 0}</td>
+                      <td className="py-3 px-4">{formatCurrency(order.total)}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                          {order.status || "N/A"}
                         </span>
                       </td>
-                      <td className="py-4 px-4 text-gray-600">{formatDate(order.created_at)}</td>
-                      <td className="py-4 px-4 text-gray-900">{order.items?.length || 0}</td>
-                      <td className="py-4 px-4 text-gray-900 font-medium">
-                        {formatCurrency(order.total)}
-                      </td>
-                      <td className="py-4 px-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            order.status || order.payment_status
-                          )}`}
-                        >
-                          {order.status || order.payment_status || "N/A"}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <Button variant="ghost" size="sm" onClick={() => openOrderModal(order)}>
+                      <td className="py-3 px-4">
+                        <Button variant="ghost" size="sm" onClick={() => fetchOrderDetails(order.id)}>
                           View
                         </Button>
                       </td>
@@ -241,7 +292,7 @@ const Orders = () => {
 
       {/* 🧾 Order Details Modal */}
       <Dialog open={isModalOpen} onOpenChange={closeModal}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[650px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex justify-between items-center">
               <span>Order Details</span>
@@ -251,66 +302,97 @@ const Orders = () => {
             </DialogTitle>
           </DialogHeader>
 
-          {selectedOrder && (
+          {loadingDetails ? (
+            <p className="text-gray-500 text-center py-4">Loading order details...</p>
+          ) : selectedOrder ? (
             <div className="space-y-4 mt-2">
+              {/* Customer Info */}
               <div>
-                <h3 className="font-semibold text-lg text-gray-800">
-                  Customer Information
-                </h3>
-                <p className="text-gray-700 mt-1">
-                  {selectedOrder.user?.first_name} {selectedOrder.user?.last_name}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {selectedOrder.user?.email} • {selectedOrder.user?.mobile}
-                </p>
+                <h3 className="font-semibold text-lg text-gray-800">Customer Information</h3>
+                <p className="text-gray-700">{selectedOrder.user?.first_name} {selectedOrder.user?.last_name}</p>
+                <p className="text-sm text-gray-600">{selectedOrder.user?.email} • {selectedOrder.user?.mobile}</p>
               </div>
 
+              {/* Shipping Address */}
               <div>
                 <h3 className="font-semibold text-lg text-gray-800">Shipping Address</h3>
                 <p className="text-gray-700 mt-1">
-                  {selectedOrder.address?.line1 || "-"}
-                  <br />
+                  {selectedOrder.address?.line1 || "-"} <br />
                   {selectedOrder.address?.city}, {selectedOrder.address?.state}{" "}
                   {selectedOrder.address?.pincode}
                 </p>
               </div>
 
+              {/* Order Summary */}
               <div>
                 <h3 className="font-semibold text-lg text-gray-800">Order Summary</h3>
                 <p className="text-gray-700 mt-1">
                   Status:{" "}
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                    selectedOrder.status
-                  )}`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                      selectedOrder.status
+                    )}`}
+                  >
                     {selectedOrder.status || "N/A"}
                   </span>
                 </p>
-                <p className="text-gray-700">
-                  Total: {formatCurrency(selectedOrder.total)}
-                </p>
-                <p className="text-gray-700">
-                  Date: {formatDate(selectedOrder.created_at)}
-                </p>
+                <p className="text-gray-700">Total: {formatCurrency(selectedOrder.total)}</p>
+                <p className="text-gray-700">Date: {formatDate(selectedOrder.created_at)}</p>
               </div>
 
+              {/* Items */}
               <div>
                 <h3 className="font-semibold text-lg text-gray-800 mb-2">Items</h3>
-                <ul className="space-y-2">
-                  {selectedOrder.items?.length > 0 ? (
-                    selectedOrder.items.map((item: any, idx: number) => (
-                      <li key={idx} className="flex justify-between border-b pb-1">
-                        <span>Product #{item.product_id}</span>
-                        <span>
-                          Qty: {item.quantity} • ₹{item.price}
-                        </span>
-                      </li>
-                    ))
-                  ) : (
-                    <p className="text-gray-500">No items found.</p>
-                  )}
-                </ul>
+                {selectedOrder.items?.length > 0 ? (
+                  <table className="w-full text-sm border">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="px-2 py-1 text-left">Product ID</th>
+                        <th className="px-2 py-1 text-left">Qty</th>
+                        <th className="px-2 py-1 text-left">Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedOrder.items.map((item: any, idx: number) => (
+                        <tr key={idx} className="border-t">
+                          <td className="px-2 py-1">{item.product_id}</td>
+                          <td className="px-2 py-1">{item.quantity}</td>
+                          <td className="px-2 py-1">₹{item.price}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="text-gray-500">No items found.</p>
+                )}
+              </div>
+
+              {/* Update Status */}
+              <div className="mt-4">
+                <h3 className="font-semibold text-gray-800 mb-2">Update Status</h3>
+                <select
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value)}
+                  className="border rounded px-3 py-2 w-full"
+                >
+                  <option value="">Select Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="processing">Processing</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+
+                <Button
+                  onClick={updateOrderStatus}
+                  disabled={updating}
+                  className="mt-3 w-full"
+                >
+                  {updating ? "Updating..." : "Update Status"}
+                </Button>
               </div>
             </div>
+          ) : (
+            <p className="text-gray-500 text-center py-4">No details found.</p>
           )}
         </DialogContent>
       </Dialog>

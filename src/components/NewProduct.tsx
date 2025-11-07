@@ -16,17 +16,22 @@ interface NewProductProps {
 export function NewProduct({ onProductCreate }: NewProductProps) {
   const [open, setOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>("");
+
   const [formData, setFormData] = useState({
     title: "",
     main_category_id: "6",
-    child_category_id: "7",
     price: "",
-    tax_amount: "200",
+    tax_amount: "0",
     tax_percentage: "18",
+    discount: "0",
+    discount_amount: "0",
     description: "",
     quantity: "100",
+    weight: "1",
+    weight_type: "kg",
   });
 
+  // ✅ Submit Product
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -39,13 +44,12 @@ export function NewProduct({ onProductCreate }: NewProductProps) {
 
       const body = {
         main_category_id: Number(formData.main_category_id),
-        child_category_id: Number(formData.child_category_id),
         title: formData.title,
         price: Number(formData.price),
         tax_amount: Number(formData.tax_amount),
         tax_percentage: Number(formData.tax_percentage),
-        discount: null,
-        discount_amount: null,
+        discount: Number(formData.discount) || 0,
+        discount_amount: Number(formData.discount_amount) || 0,
         description: formData.description,
         status: 1,
         availability: Number(formData.quantity),
@@ -53,6 +57,8 @@ export function NewProduct({ onProductCreate }: NewProductProps) {
         image:
           imageUrl ||
           "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTk3bLKjYcnH1",
+        weight: formData.weight,
+        weight_type: formData.weight_type,
       };
 
       const response = await fetch(
@@ -77,15 +83,20 @@ export function NewProduct({ onProductCreate }: NewProductProps) {
 
       toast.success("✅ Product added successfully!");
       onProductCreate(result.data || body);
+
+      // Reset Form
       setFormData({
         title: "",
         main_category_id: "6",
-        child_category_id: "7",
         price: "",
-        tax_amount: "200",
+        tax_amount: "0",
         tax_percentage: "18",
+        discount: "0",
+        discount_amount: "0",
         description: "",
         quantity: "100",
+        weight: "1",
+        weight_type: "kg",
       });
       setImageUrl("");
       setOpen(false);
@@ -95,6 +106,7 @@ export function NewProduct({ onProductCreate }: NewProductProps) {
     }
   };
 
+  // ✅ Handle Image Preview
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -116,11 +128,14 @@ export function NewProduct({ onProductCreate }: NewProductProps) {
           Add Product
         </Button>
       </DialogTrigger>
+
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Product</DialogTitle>
         </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">Product Title *</Label>
             <Input
@@ -132,41 +147,7 @@ export function NewProduct({ onProductCreate }: NewProductProps) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Main Category *</Label>
-              <Select
-                value={formData.main_category_id}
-                onValueChange={(v) => setFormData({ ...formData, main_category_id: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select main category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="6">Groceries</SelectItem>
-                  <SelectItem value="7">Rice & Grains</SelectItem>
-                  <SelectItem value="8">Electronics</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Sub Category *</Label>
-              <Select
-                value={formData.child_category_id}
-                onValueChange={(v) => setFormData({ ...formData, child_category_id: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select sub category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="7">Rice Bags</SelectItem>
-                  <SelectItem value="8">Kitchen Essentials</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
+          {/* Price & Quantity */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="price">Price *</Label>
@@ -192,17 +173,105 @@ export function NewProduct({ onProductCreate }: NewProductProps) {
             </div>
           </div>
 
+          {/* Tax & Discounts */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="tax_amount">Tax Amount *</Label>
+              <Input
+                id="tax_amount"
+                type="number"
+                value={formData.tax_amount}
+                onChange={(e) => setFormData({ ...formData, tax_amount: e.target.value })}
+                placeholder="200"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tax_percentage">Tax % *</Label>
+              <Input
+                id="tax_percentage"
+                type="number"
+                value={formData.tax_percentage}
+                onChange={(e) =>
+                  setFormData({ ...formData, tax_percentage: e.target.value })
+                }
+                placeholder="18"
+              />
+            </div>
+          </div>
+
+          {/* Discount Fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="discount">Discount (%)</Label>
+              <Input
+                id="discount"
+                type="number"
+                value={formData.discount}
+                onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
+                placeholder="e.g. 10"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="discount_amount">Discount Amount</Label>
+              <Input
+                id="discount_amount"
+                type="number"
+                value={formData.discount_amount}
+                onChange={(e) =>
+                  setFormData({ ...formData, discount_amount: e.target.value })
+                }
+                placeholder="e.g. 200"
+              />
+            </div>
+          </div>
+
+          {/* Weight Fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="weight">Weight *</Label>
+              <Input
+                id="weight"
+                type="number"
+                value={formData.weight}
+                onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                placeholder="25"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Weight Type *</Label>
+              <Select
+                value={formData.weight_type}
+                onValueChange={(v) => setFormData({ ...formData, weight_type: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select unit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="kg">Kilogram (kg)</SelectItem>
+                  <SelectItem value="g">Gram (g)</SelectItem>
+                  <SelectItem value="ltr">Litre (ltr)</SelectItem>
+                  <SelectItem value="ml">Millilitre (ml)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="Product details..."
               rows={3}
             />
           </div>
 
+          {/* Image Upload */}
           <div className="space-y-2">
             <Label htmlFor="image">Product Image</Label>
             <input
@@ -233,8 +302,11 @@ export function NewProduct({ onProductCreate }: NewProductProps) {
             )}
           </div>
 
+          {/* Buttons */}
           <div className="flex gap-2 pt-4">
-            <Button type="submit" className="flex-1">Add Product</Button>
+            <Button type="submit" className="flex-1">
+              Add Product
+            </Button>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>

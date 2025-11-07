@@ -1,0 +1,80 @@
+/* ---------------- Base Layout ---------------- */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+/* Sidebar on the left, content on the right */
+.layout-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------- Header ---------------- */
+.layout-header {
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 12px; /* space between ☰ and title */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.layout-header h1,
+.header-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------------- Main Content ---------------- */
+.layout-content {
+  padding: 1.5rem;
+  overflow-x: hidden;
+  background: #f9fafb;
+  flex: 1;
+}
+
+/* ---------------- Menu Icon (☰) ---------------- */
+.menu-toggle {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #1f2937;
+  display: none; /* hidden on large screens */
+}
+
+/* ---------------- Responsive Fixes ---------------- */
+@media (max-width: 1024px) {
+  .layout-header {
+    justify-content: flex-start;
+    gap: 15px;
+    padding: 0 0.8rem;
+    min-height: 56px;
+  }
+
+  .layout-header h1 {
+    font-size: 1rem;
+    max-width: 80%;
+  }
+
+  /* show menu icon only on smaller screens */
+  .menu-toggle {
+    display: block;
+  }
+}
+
+@media (max-width: 600px) {
+  .layout-header h1 {
+    font-size: 0.95rem;
+    max-width: 70%;
+  }
+}

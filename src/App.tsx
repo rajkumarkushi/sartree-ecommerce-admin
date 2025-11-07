@@ -1,10 +1,13 @@
 // App.tsx
+import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
+
+// Components & Pages
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
@@ -15,27 +18,21 @@ import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import SignIn from "./pages/SignIn";
 import NotFound from "./pages/NotFound";
-import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
 
-// small wrapper to provide navigation in the top-level component
 function AppRoutes() {
-  const [token, setToken] = useState<string | null>(() => {
-    // initialise from localStorage
-    return localStorage.getItem("adminToken");
-  });
-
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem("adminToken"));
   const navigate = useNavigate();
 
-  // call this after successful login in SignIn
+  // ✅ Handle Login Success
   const handleSignIn = (receivedToken: string) => {
     localStorage.setItem("adminToken", receivedToken);
     setToken(receivedToken);
-    // navigate to dashboard
     navigate("/dashboard", { replace: true });
   };
 
+  // ✅ Handle Logout
   const handleSignOut = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
@@ -45,50 +42,50 @@ function AppRoutes() {
 
   const isAuthenticated = Boolean(token);
 
-  // optional: check token expiry / validate token on mount with an API call
+  // (Optional) Validate token on mount
   useEffect(() => {
-    // if you want to validate token on load, do it here using react-query / fetch
+    // Example: API validation could go here
   }, []);
 
   return (
     <SidebarProvider>
-      <Layout onSignOut={handleSignOut}>
-        <Routes>
-          {/* public routes */}
-          <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <SignIn onSignIn={handleSignIn} />} />
-          {/* Protected routes */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Routes>
+        {/* 🔓 Public Route */}
+        <Route
+          path="/login"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <SignIn onSignIn={handleSignIn} />
+            )
+          }
+        />
+
+        {/* 🔐 Protected Routes */}
+        {isAuthenticated ? (
           <Route
-            path="/dashboard"
-            element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />}
+            path="/*"
+            element={
+              <Layout onSignOut={handleSignOut}>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/customers" element={<Customers />} />
+                  <Route path="/orders" element={<Orders />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/tickets" element={<Tickets />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Layout>
+            }
           />
-          <Route
-            path="/customers"
-            element={isAuthenticated ? <Customers /> : <Navigate to="/login" replace />}
-          />
-          <Route
-            path="/orders"
-            element={isAuthenticated ? <Orders /> : <Navigate to="/login" replace />}
-          />
-          <Route
-            path="/products"
-            element={isAuthenticated ? <Products /> : <Navigate to="/login" replace />}
-          />
-          <Route
-            path="/tickets"
-            element={isAuthenticated ? <Tickets /> : <Navigate to="/login" replace />}
-          />
-          <Route
-            path="/settings"
-            element={isAuthenticated ? <Settings /> : <Navigate to="/login" replace />}
-          />
-          <Route
-            path="/profile"
-            element={isAuthenticated ? <Profile /> : <Navigate to="/login" replace />}
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Layout>
+        ) : (
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        )}
+      </Routes>
     </SidebarProvider>
   );
 }
